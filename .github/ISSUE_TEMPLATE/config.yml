@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 質問・相談
+    url: https://github.com/Fujita0113/GameMacroAssistant/discussions
+    about: 機能の使い方や一般的な質問はDiscussionsをご利用ください
+  - name: 📖 ドキュメント
+    url: https://github.com/Fujita0113/GameMacroAssistant/wiki
+    about: 詳細な使用方法やAPIリファレンスはWikiをご確認ください
+  - name: 🔒 セキュリティ脆弱性報告
+    url: https://github.com/Fujita0113/GameMacroAssistant/security/advisories/new
+    about: セキュリティに関する問題は専用フォームからご報告ください

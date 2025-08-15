@@ -1,0 +1,45 @@
+<UserControl x:Class="GameMacroAssistant.Wpf.Views.EditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <!-- ビジュアルエディタ詳細実装エリア (R-007, R-008) -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- エディタツールバー -->
+        <ToolBar Grid.Row="0">
+            <!-- Undo/Redo (R-009) -->
+            <Button Command="{Binding UndoCommand}" Content="Undo" 
+                    AutomationProperties.Name="操作を元に戻す"/>
+            <Button Command="{Binding RedoCommand}" Content="Redo" 
+                    AutomationProperties.Name="操作をやり直す"/>
+            
+            <Separator/>
+            
+            <!-- 画像編集ツール (R-008) -->
+            <Button Command="{Binding SelectImageCommand}" Content="画像選択" 
+                    AutomationProperties.Name="条件画像を選択"/>
+            <Button Command="{Binding CropImageCommand}" Content="切り抜き" 
+                    AutomationProperties.Name="画像を切り抜き"/>
+        </ToolBar>
+        
+        <!-- メインエディタエリア -->
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Canvas Name="EditorCanvas" 
+                    Background="LightGray" 
+                    AllowDrop="True"
+                    MinWidth="800" 
+                    MinHeight="600"
+                    AutomationProperties.Name="ビジュアルエディタキャンバス"
+                    AutomationProperties.HelpText="マクロのステップブロックをドラッグして編集できます">
+                
+                <!-- TODO: ブロック化されたマクロステップの表示 (R-007) -->
+                <!-- TODO: ドラッグ矩形選択による画像編集 (R-008) -->
+                <!-- TODO: スナップ機能付きドラッグ&ドロップ (R-010) -->
+                
+            </Canvas>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

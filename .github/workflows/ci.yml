@@ -1,0 +1,259 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  BUILD_CONFIGURATION: 'Release'
+  COVERAGE_THRESHOLD: 80
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: src
+    
+    - name: Build solution
+      run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+      working-directory: src
+    
+    - name: Run unit tests with coverage
+      run: |
+        dotnet test --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal `
+          --collect:"XPlat Code Coverage" --results-directory coverage `
+          --logger "console;verbosity=minimal" --logger "trx;LogFileName=test-results.trx"
+      working-directory: src
+    
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+    
+    - name: Generate coverage report
+      run: |
+        reportgenerator -reports:"src/coverage/**/coverage.cobertura.xml" `
+          -targetdir:"coverage-report" -reporttypes:"Html;Cobertura;JsonSummary" `
+          -verbosity:Warning
+    
+    - name: Check coverage threshold
+      shell: pwsh
+      run: |
+        $jsonPath = "coverage-report/Summary.json"
+        if (Test-Path $jsonPath) {
+          $coverage = Get-Content $jsonPath | ConvertFrom-Json
+          $lineCoverage = [math]::Round($coverage.summary.linecoverage, 2)
+          Write-Host "Line Coverage: $lineCoverage%"
+          
+          if ($lineCoverage -lt ${{ env.COVERAGE_THRESHOLD }}) {
+            Write-Error "Coverage $lineCoverage% is below threshold ${{ env.COVERAGE_THRESHOLD }}%"
+            exit 1
+          }
+          
+          # カバレッジバッジ用の環境変数設定
+          echo "COVERAGE_PERCENTAGE=$lineCoverage" >> $env:GITHUB_ENV
+        } else {
+          Write-Error "Coverage report not found"
+          exit 1
+        }
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          src/**/TestResults/*.trx
+          coverage-report/
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: github.event_name == 'push'
+      with:
+        file: coverage-report/Cobertura.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Static analysis with .NET analyzers
+      run: |
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal `
+          -p:TreatWarningsAsErrors=true -p:WarningsAsErrors="" `
+          -p:RunAnalyzersDuringBuild=true
+      working-directory: src
+    
+    - name: Security scan with CodeQL
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: github/codeql-action/init@v3
+      with:
+        languages: csharp
+    
+    - name: Perform CodeQL Analysis
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: github/codeql-action/analyze@v3
+
+  package:
+    runs-on: windows-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: src
+    
+    - name: Publish Windows application
+      run: |
+        dotnet publish src/GameMacroAssistant.Wpf/GameMacroAssistant.Wpf.csproj `
+          --configuration ${{ env.BUILD_CONFIGURATION }} `
+          --runtime win-x64 --self-contained true `
+          --output publish/win-x64 `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:PublishTrimmed=false
+    
+    - name: Create installer (Future)
+      run: |
+        # TODO: WiX Toolset integration for MSI installer
+        # TODO: Code signing with certificate
+        Write-Host "Installer creation will be implemented in future iterations"
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-build
+        path: publish/
+        retention-days: 30
+
+  performance-test:
+    runs-on: windows-latest
+    needs: build-and-test
+    if: github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Build for performance testing
+      run: |
+        dotnet build --configuration Release
+      working-directory: src
+    
+    - name: Run performance benchmarks
+      run: |
+        # TODO: BenchmarkDotNet integration
+        # パフォーマンス要件テスト (R-020):
+        # - CPU使用率 ≤ 15%
+        # - メモリ使用量 ≤ 300MB
+        # - 画面キャプチャ ≤ 50ms
+        # - 入力精度 ≤ 5ms平均, ≤ 15ms最大
+        Write-Host "Performance benchmarks will be implemented with BenchmarkDotNet"
+    
+    - name: Memory leak detection
+      run: |
+        # TODO: Application Verifier integration
+        # TODO: PerfView ETW tracing
+        Write-Host "Memory leak detection tools integration pending"
+
+  headless-test:
+    runs-on: windows-latest
+    needs: build-and-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Build application
+      run: |
+        dotnet build --configuration ${{ env.BUILD_CONFIGURATION }}
+      working-directory: src
+    
+    - name: Test headless mode (R-023)
+      run: |
+        # TODO: --headless オプションでのマクロ実行テスト
+        # 自動テスト環境でのUI非表示実行
+        Write-Host "Headless mode testing implementation pending"
+        
+        # 将来の実装例:
+        # dotnet run --project src/GameMacroAssistant.Wpf -- --headless --macro "test-macro.gma.json"
+
+  deployment:
+    runs-on: windows-latest
+    needs: [build-and-test, package]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
+    environment: production
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: windows-build
+        path: release/
+    
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: GameMacroAssistant ${{ github.ref }}
+        body: |
+          ## What's Changed
+          - 自動ビルドによるリリース
+          - カバレッジ: ${{ env.COVERAGE_PERCENTAGE }}%
+          - 全テスト成功
+          
+          ## System Requirements
+          - Windows 11 (推奨)
+          - .NET 8.0 Runtime (同梱)
+          - DirectX 11 対応GPU (推奨)
+        draft: false
+        prerelease: false
+
+# Issue駆動開発フローとの連携
+# 将来実装予定:
+# - Issue完了時の自動デプロイメント
+# - review-agentとの連携
+# - カバレッジ結果のIssue更新

@@ -1,0 +1,239 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/GameMacroAssistant/schema/macro_v1.json",
+  "title": "GameMacroAssistant Macro File Schema v1.0",
+  "description": "マクロファイル(.gma.json)のJSONスキーマ定義 (R-027)",
+  "type": "object",
+  "required": ["id", "name", "version", "createdAt", "steps", "settings"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "マクロの一意識別子",
+      "pattern": "^[a-f0-9-]{36}$"
+    },
+    "name": {
+      "type": "string",
+      "description": "マクロ名",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "description": {
+      "type": "string",
+      "description": "マクロの説明",
+      "maxLength": 1000
+    },
+    "version": {
+      "type": "string",
+      "description": "マクロバージョン",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "default": "1.0"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "作成日時 (ISO 8601)"
+    },
+    "modifiedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "最終更新日時 (ISO 8601)"
+    },
+    "isEncrypted": {
+      "type": "boolean",
+      "description": "パスフレーズ暗号化フラグ (R-018)",
+      "default": false
+    },
+    "steps": {
+      "type": "array",
+      "description": "マクロ実行ステップ",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/mouseStep" },
+          { "$ref": "#/$defs/keyboardStep" },
+          { "$ref": "#/$defs/delayStep" },
+          { "$ref": "#/$defs/imageWaitStep" }
+        ]
+      }
+    },
+    "settings": {
+      "$ref": "#/$defs/macroSettings"
+    }
+  },
+  "$defs": {
+    "macroSettings": {
+      "type": "object",
+      "description": "マクロ実行設定",
+      "required": ["imageMatch", "stopRecordingKey"],
+      "properties": {
+        "imageMatch": {
+          "$ref": "#/$defs/imageMatchSettings"
+        },
+        "stopRecordingKey": {
+          "type": "integer",
+          "description": "記録停止キー (仮想キーコード, R-005)",
+          "minimum": 1,
+          "maximum": 255,
+          "default": 27
+        },
+        "globalHotkey": {
+          "type": ["string", "null"],
+          "description": "グローバルホットキー設定 (R-012)",
+          "maxLength": 50
+        }
+      }
+    },
+    "imageMatchSettings": {
+      "type": "object",
+      "description": "画像マッチング設定 (R-013)",
+      "required": ["ssimThreshold", "pixelDifferenceThreshold"],
+      "properties": {
+        "ssimThreshold": {
+          "type": "number",
+          "description": "SSIM閾値 (0.0-1.0)",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 0.95
+        },
+        "pixelDifferenceThreshold": {
+          "type": "number",
+          "description": "ピクセル差分閾値 (0.0-1.0)",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 0.03
+        }
+      }
+    },
+    "baseStep": {
+      "type": "object",
+      "required": ["id", "type", "timestamp"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ステップの一意識別子"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["mouse", "keyboard", "delay", "imageWait"]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ステップ記録時刻"
+        },
+        "screenshotPath": {
+          "type": ["string", "null"],
+          "description": "スクリーンショットファイルパス (R-004)"
+        }
+      }
+    },
+    "mouseStep": {
+      "allOf": [
+        { "$ref": "#/$defs/baseStep" },
+        {
+          "type": "object",
+          "required": ["position", "button", "pressedDurationMs"],
+          "properties": {
+            "type": { "const": "mouse" },
+            "position": {
+              "type": "object",
+              "description": "スクリーン絶対座標 (R-002)",
+              "required": ["x", "y"],
+              "properties": {
+                "x": { "type": "integer", "minimum": 0, "maximum": 65535 },
+                "y": { "type": "integer", "minimum": 0, "maximum": 65535 }
+              }
+            },
+            "button": {
+              "type": "string",
+              "enum": ["left", "right", "middle", "x1", "x2"],
+              "description": "マウスボタン種別 (R-002)"
+            },
+            "pressedDurationMs": {
+              "type": "integer",
+              "description": "押下時間 (ms, R-002)",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          }
+        }
+      ]
+    },
+    "keyboardStep": {
+      "allOf": [
+        { "$ref": "#/$defs/baseStep" },
+        {
+          "type": "object",
+          "required": ["virtualKeyCode", "action"],
+          "properties": {
+            "type": { "const": "keyboard" },
+            "virtualKeyCode": {
+              "type": "integer",
+              "description": "仮想キーコード (R-003)",
+              "minimum": 1,
+              "maximum": 255
+            },
+            "action": {
+              "type": "string",
+              "enum": ["keyDown", "keyUp"],
+              "description": "キー操作種別 (R-003)"
+            }
+          }
+        }
+      ]
+    },
+    "delayStep": {
+      "allOf": [
+        { "$ref": "#/$defs/baseStep" },
+        {
+          "type": "object",
+          "required": ["delayMs"],
+          "properties": {
+            "type": { "const": "delay" },
+            "delayMs": {
+              "type": "integer",
+              "description": "待機時間 (ms)",
+              "minimum": 0,
+              "maximum": 300000
+            }
+          }
+        }
+      ]
+    },
+    "imageWaitStep": {
+      "allOf": [
+        { "$ref": "#/$defs/baseStep" },
+        {
+          "type": "object",
+          "required": ["imagePath", "timeoutMs"],
+          "properties": {
+            "type": { "const": "imageWait" },
+            "imagePath": {
+              "type": "string",
+              "description": "検索対象画像のパス",
+              "minLength": 1,
+              "maxLength": 260
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "description": "タイムアウト時間 (ms, R-015)",
+              "minimum": 100,
+              "maximum": 300000,
+              "default": 5000
+            },
+            "searchArea": {
+              "type": ["object", "null"],
+              "description": "検索領域 (nullの場合は全画面)",
+              "required": ["x", "y", "width", "height"],
+              "properties": {
+                "x": { "type": "integer", "minimum": 0 },
+                "y": { "type": "integer", "minimum": 0 },
+                "width": { "type": "integer", "minimum": 1 },
+                "height": { "type": "integer", "minimum": 1 }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

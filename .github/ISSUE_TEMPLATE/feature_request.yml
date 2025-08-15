@@ -1,0 +1,235 @@
+name: ✨ 機能要望
+description: GameMacroAssistant の新機能やenhancement を提案する
+title: "[FEATURE] 機能名"
+labels: ["enhancement", "feature-request"]
+projects: ["GameMacroAssistant"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ 機能要望
+        GameMacroAssistant に追加したい新機能や既存機能の改善を提案してください。
+
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: 要望タイプ
+      description: 提案する内容のタイプを選択してください
+      options:
+        - 新機能追加
+        - 既存機能の改善
+        - UI/UX改善
+        - パフォーマンス改善
+        - アクセシビリティ向上
+        - 設定オプション追加
+        - 操作性向上
+        - その他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: この機能の重要度を選択してください
+      options:
+        - High (必須機能・重要な改善)
+        - Medium (あると便利な機能)
+        - Low (将来的に検討したい機能)
+      default: 1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target_component
+    attributes:
+      label: 対象コンポーネント
+      description: 機能を追加・改善したいコンポーネントを選択してください
+      options:
+        - マクロ記録
+        - ビジュアルエディタ
+        - マクロ実行
+        - 画像マッチング
+        - ファイル管理
+        - 設定画面
+        - UI全般
+        - パフォーマンス
+        - セキュリティ
+        - アクセシビリティ
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: 解決したい課題
+      description: 現在どのような問題や不便さがあるかを説明してください
+      placeholder: |
+        マクロ実行時に、同じパターンの画像が複数ある場合、意図しない場所をクリックしてしまうことがあります。
+        特定の領域内でのみ画像マッチングを行いたい場合があります。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: 提案する解決方法
+      description: どのような機能・改善によって課題を解決したいかを詳しく説明してください
+      placeholder: |
+        画像マッチング時に検索範囲を指定できる機能を追加する。
+        
+        具体的には：
+        1. ビジュアルエディタで画像ブロックを選択
+        2. 「検索範囲設定」ボタンをクリック
+        3. スクリーンショット上でドラッグして検索範囲を指定
+        4. 指定した範囲内でのみ画像マッチングを実行
+    validations:
+      required: true
+
+  - type: textarea
+    id: detailed_description
+    attributes:
+      label: 詳細仕様
+      description: 機能の詳細な動作や仕様について説明してください
+      placeholder: |
+        ## UI設計
+        - 画像ブロックのプロパティパネルに「検索範囲」セクション追加
+        - 「範囲設定」ボタンで範囲選択モードに移行
+        - 選択した範囲は矩形として保存（X, Y, Width, Height）
+        
+        ## 機能仕様
+        - 範囲未設定時は画面全体で検索（従来と同じ動作）
+        - 範囲設定時は指定領域内でのみマッチング実行
+        - 範囲外に同じ画像があっても無視
+        
+        ## エラーハンドリング
+        - 指定範囲内に画像が見つからない場合のタイムアウト処理
+        - 範囲設定が無効な場合の警告表示
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: 利用シーン・ユースケース
+      description: この機能がどのような場面で役立つかを具体例で説明してください
+      placeholder: |
+        ## ユースケース1: ゲーム内UI操作
+        - RPGゲームで「はい」ボタンが複数の場面で表示される
+        - ダイアログ領域内でのみ「はい」を検索したい
+        
+        ## ユースケース2: 作業効率化
+        - エクセルの特定セル範囲での操作自動化
+        - ブラウザの特定エリア内でのボタンクリック
+        
+        ## ユースケース3: 誤操作防止
+        - 重要でない場所の類似ボタンを誤ってクリックしない
+        - 画面レイアウト変更時の影響を最小化
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternative_solutions
+    attributes:
+      label: 代替案
+      description: 他に考えられる解決方法があれば記載してください
+      placeholder: |
+        ## 代替案1: 画像の類似度閾値調整
+        - より厳密な画像マッチング設定で誤マッチを減らす
+        - デメリット: 微細な変化で認識失敗の可能性
+        
+        ## 代替案2: 座標オフセット指定
+        - 基準画像からの相対座標でクリック位置を指定
+        - デメリット: 画面レイアウト変更に弱い
+    validations:
+      required: false
+
+  - type: dropdown
+    id: user_expertise
+    attributes:
+      label: 利用者レベル
+      description: この機能の想定利用者レベルを選択してください
+      options:
+        - 初心者向け (プログラミング知識不要)
+        - 中級者向け (基本操作は理解済み)
+        - 上級者向け (高度な設定・カスタマイズ)
+        - 開発者向け (技術的な機能)
+    validations:
+      required: true
+
+  - type: input
+    id: implementation_complexity
+    attributes:
+      label: 実装複雑度見積り
+      description: "実装の複雑さを1-10で評価してください (1=簡単, 10=非常に複雑)"
+      placeholder: "5"
+    validations:
+      required: false
+
+  - type: textarea
+    id: ui_mockup
+    attributes:
+      label: UI モックアップ・画面設計
+      description: |
+        UIの設計案がある場合は記載してください。
+        スクリーンショットやワイヤーフレームを添付することもできます。
+      placeholder: |
+        ```
+        [画像ブロック プロパティパネル]
+        ┌─────────────────────────┐
+        │ 画像: screenshot_001.png │
+        │ 閾値: [95%        ] │
+        │                         │
+        │ ◎ 検索範囲               │
+        │ [ ] 範囲指定なし(全画面)  │
+        │ [●] 範囲指定            │
+        │   X: [100] Y: [200]     │
+        │   W: [300] H: [150]     │
+        │   [範囲再設定]           │
+        └─────────────────────────┘
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 追加情報
+      description: その他、機能実装に役立つ情報があれば記載してください
+      placeholder: |
+        - 参考になる類似ソフトウェアの機能
+        - 関連する技術記事やライブラリ
+        - 実装時の注意点や制約事項
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: implementation_help
+    attributes:
+      label: 実装協力
+      description: 機能実装にご協力いただけますか？
+      options:
+        - label: テスト協力が可能です
+          required: false
+        - label: UI設計のフィードバックを提供できます
+          required: false
+        - label: 実装作業に参加したいです
+          required: false
+        - label: ドキュメント作成を手伝えます
+          required: false
+
+  - type: checkboxes
+    id: breaking_changes
+    attributes:
+      label: 互換性への影響
+      description: この機能実装による影響について確認してください
+      options:
+        - label: 既存のマクロファイルとの互換性を保つ必要があります
+          required: false
+        - label: 新機能は既存機能に影響を与えません
+          required: false
+        - label: 設定移行が必要になる可能性があります
+          required: false

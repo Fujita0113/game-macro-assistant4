@@ -1,0 +1,141 @@
+name: 📋 タスク実装
+description: 要件定義に基づく実装タスクを作成する
+title: "[T-XXX] R-XXX: タスク名"
+labels: ["task", "implementation"]
+projects: ["GameMacroAssistant"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📋 タスク概要
+        要件定義 v3.3 に基づく実装タスクです。開発前に要件IDと実装内容を明確にしてください。
+
+  - type: input
+    id: requirement_id
+    attributes:
+      label: 要件ID
+      description: docs/requirement.md の要件ID (例: R-001)
+      placeholder: "R-001"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: functional_group
+    attributes:
+      label: 機能グループ
+      description: 実装対象の機能グループを選択してください
+      options:
+        - マクロ記録
+        - ビジュアルエディタ
+        - マクロ実行
+        - プロジェクト管理
+        - セキュリティ
+        - 品質保証
+        - パフォーマンス
+        - アクセシビリティ
+        - 環境
+        - 自動テスト
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: タスクの優先度を選択してください
+      options:
+        - High
+        - Medium
+        - Low
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirement_content
+    attributes:
+      label: 対象要件内容
+      description: requirement.md から対象要件の内容をコピーしてください
+      placeholder: |
+        ユーザーはUI上のボタンクリックによってマクロの記録を開始できる。
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_scope
+    attributes:
+      label: 実装範囲
+      description: このタスクで実装する具体的な内容を記述してください
+      placeholder: |
+        - UI実装: MainView.xaml にマクロ記録開始ボタン追加
+        - ViewModelholds: StartRecordingCommand 実装
+        - Service層: IMacroRecorder インターフェース実装
+        - テスト: RecordingService の単体テスト作成
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: completion_criteria
+    attributes:
+      label: 完了基準チェックリスト
+      description: タスク完了のための必須チェック項目
+      options:
+        - label: ビルド成功
+          required: true
+        - label: 全テスト成功
+          required: true
+        - label: カバレッジ80%以上達成
+          required: true
+        - label: コードレビュー完了 (review-agent による)
+          required: true
+        - label: ユーザーテスト手順書作成完了
+          required: true
+
+  - type: textarea
+    id: acceptance_test
+    attributes:
+      label: 受け入れテスト手順
+      description: 実装後にユーザーが確認する手順を記述してください
+      placeholder: |
+        1. アプリケーションを起動
+        2. メイン画面の「記録開始」ボタンをクリック
+        3. ボタンが「記録停止」に変わることを確認
+        4. マウス操作を実行
+        5. ESCキーで記録停止
+        6. 記録内容がエディタに表示されることを確認
+    validations:
+      required: true
+
+  - type: input
+    id: estimated_hours
+    attributes:
+      label: 見積り時間 (時間)
+      description: 実装・テスト・レビューを含む総時間
+      placeholder: "8"
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 依存関係
+      description: このタスクが依存する他のタスクやコンポーネント
+      placeholder: |
+        - R-005: 記録停止キー設定機能
+        - インフラ: ソリューション構造作成済み
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足・注意事項
+      description: 実装時の注意点や参考情報
+      placeholder: |
+        - Windows APIフック処理は非同期で実装
+        - エラー処理は ArgumentNullException を含む
+        - パフォーマンス要件: CPU使用率15%以下
+    validations:
+      required: false
