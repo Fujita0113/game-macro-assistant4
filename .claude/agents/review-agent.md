@@ -79,6 +79,14 @@ fi
 | Static Analysis Warnings/Errors | 0                              |
 | Coverage                        | ≥ 80 % **OR** +5 % vs baseline |
 
+## 4.1. レビュー観点
+1. **SOLID原則準拠度** - 単一責任、開放閉鎖、リスコフ置換、インターフェース分離、依存性逆転
+2. **テストカバレッジ(80%+)** - Line Coverage ≥80%, Branch Coverage ≥70%
+3. **エラーハンドリング適切性** - try-catch、ArgumentNullException、Win32Exception
+4. **Windows API使用方法** - P/Invoke適切性、エラーコード確認、IntPtr妥当性チェック
+5. **パフォーマンス要件適合** - 画面キャプチャ≤50ms、入力精度≤5ms、CPU≤15%、メモリ≤300MB
+6. **メモリ管理(using/IDisposable)** - usingステートメント、Dispose実装、リソース解放
+
 * **All Pass** → proceed to §5 (PASS).
 * **Any Fail** → §6 (FAIL).
 
@@ -87,6 +95,7 @@ fi
 1. Create / update `docs/reviews/<TaskID>.md` with:
 
    * **Overview**, **Key Changes**, **Coverage %,** **LGTM** stamp.
+   * **レビュー結果** - 合格項目、修正推奨事項、具体的修正指示、修正完了チェックリスト
 2. Edit sprint row:
 
    ```
@@ -116,6 +125,8 @@ fi
 
    * **Issues Found** list (bullet)
    * Suggested fixes / code excerpts.
+   * **修正推奨事項** - ファイル名:行番号での具体的指摘
+   * **修正完了チェックリスト** - 実装者が確認すべき項目
 2. Change sprint row:
 
    ```
