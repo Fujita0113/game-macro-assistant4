@@ -10,7 +10,9 @@
       "Bash(dotnet test:*)",
       "Bash(git add:*)",
       "Bash(git restore:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(gh issue:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []
